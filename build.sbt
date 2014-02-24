@@ -14,10 +14,20 @@ sbtPlugin := true
 // Load scct from remote:
 resolvers += "scct-github-repository" at "http://mtkopone.github.com/scct/maven-repo"
 
+resolvers += "Local Repo" at "file://" + Path.userHome + "/.m2/repository"
+
 // For local development:
 // resolvers += "scct-repository" at "file:///Users/mtkopone/dev/scct-root/gh-pages/maven-repo"
 
 libraryDependencies += "reaktor" %% "scct" % "0.2-SNAPSHOT"
 
-publishTo := Some(Resolver.file("file",  new File("../gh-pages/maven-repo")))
+publishTo <<= version {
+    (v: String) =>
+        val ansviaRepo = "http://scala.repo.ansvia.com/nexus"
+        if (v.trim.endsWith("SNAPSHOT"))
+            Some("snapshots" at ansviaRepo + "/content/repositories/snapshots")
+        else
+            Some("releases" at ansviaRepo + "/content/repositories/releases")
+}
 
+credentials += Credentials(Path.userHome / ".ivy2" / ".credentials-ansvia")
